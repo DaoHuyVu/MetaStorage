@@ -1,6 +1,8 @@
 package com.atbmtt.l01.MetaStorage.controller;
 import com.atbmtt.l01.MetaStorage.exception.TokenExpiredException;
 import com.atbmtt.l01.MetaStorage.exception.UserExistException;
+import com.atbmtt.l01.MetaStorage.request.LoginRequest;
+import com.atbmtt.l01.MetaStorage.request.SignUpRequest;
 import com.atbmtt.l01.MetaStorage.response.GenericResponse;
 import com.atbmtt.l01.MetaStorage.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,19 +20,16 @@ public class AccountController {
     private AccountService accountService;
     @PostMapping("login")
     public ResponseEntity<?> login(
-            @RequestParam("email") String email,
-            @RequestParam("password") String password
-    ){
-        return ResponseEntity.ok().body(accountService.login(email,password));
+            @RequestBody LoginRequest request
+            ){
+        return ResponseEntity.ok().body(accountService.login(request.getUserName(),request.getPassword()));
     }
     @PostMapping("signUp")
     public ResponseEntity<?> signUp(
-            @RequestParam("userName") String userName,
-            @RequestParam("email") String email,
-            @RequestParam("password") String password
+            @RequestBody SignUpRequest request
     ){
         try{
-            accountService.signUp(userName,email,password);
+            accountService.signUp(request.getUserName(),request.getEmail(),request.getPassword());
             return ResponseEntity.ok().body(
                     new GenericResponse(
                             "Account created successfully",
