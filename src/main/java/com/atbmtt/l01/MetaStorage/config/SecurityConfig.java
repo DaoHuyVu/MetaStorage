@@ -21,6 +21,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 @Configuration
 @EnableWebSecurity
 @SuppressWarnings("unused")
@@ -73,6 +76,21 @@ public class SecurityConfig {
                                     "/account/login", "/account/signUp","/account/verify"
                                 ).permitAll()
                                 .anyRequest().authenticated())
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .build();
+    }
+    @Bean
+    @Order(2)
+    public SecurityFilterChain authenticatedRequestSecurityFilterChain(HttpSecurity httpSecurity) throws Exception{
+        return httpSecurity
+                .securityMatcher(
+                        "/resource/**"
+                )
+                .authorizeHttpRequests(auth ->
+                    auth
+                            .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authenticationManager(authenticationManager())

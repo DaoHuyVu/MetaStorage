@@ -6,7 +6,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface UserAccountRepository extends JpaRepository<UserAccount,Long> {
-    UserAccount findByEmail(@Param("email") String email);
+    Optional<UserAccount> findByEmail(@Param("email") String email);
 }

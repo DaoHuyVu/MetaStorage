@@ -7,11 +7,8 @@
         </encoder>
     </appender>
 
-    <logger name="org.springframework.security" level="DEBUG">
-
-    </logger>
-    <!-- Strictly speaking, the level attribute is not necessary since -->
-    <!-- the level of the root level is set to DEBUG by default.       -->
+    <logger name="org.springframework.security" level="DEBUG"/>
+    <logger name="org.springframework.security.web" level="TRACE" />
     <root level="INFO">
         <appender-ref ref="STDOUT" />
     </root>

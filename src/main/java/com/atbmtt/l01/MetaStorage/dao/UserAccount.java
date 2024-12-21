@@ -31,6 +31,8 @@ public class UserAccount {
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "account",orphanRemoval = true)
     private List<ActivateToken> tokens = new ArrayList<>();
 
+    @OneToMany(mappedBy = "account",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<UserResource> resources = new ArrayList<>();
 //    @JoinTable(name = "account_role",
 //            joinColumns = @JoinColumn(name = "account_id"),
 //            inverseJoinColumns = @JoinColumn(name = "role_id")
@@ -43,20 +45,13 @@ public class UserAccount {
     @Column(name = "role",nullable = false)
     @Enumerated(EnumType.STRING)
     private ERole role;
+
     public UserAccount(String email, String password) {
         this.email = email;
         this.password = password;
         this.createdAt = LocalDateTime.now();
         this.isActivated = false;
         this.role = ERole.ROLE_USER;
-    }
-    public void addToken(ActivateToken token){
-        tokens.add(token);
-        token.setAccount(this);
-    }
-    public void removeToken(ActivateToken token){
-        tokens.remove(token);
-        token.setAccount(null);
     }
     @Override
     public boolean equals(Object o){
@@ -67,5 +62,14 @@ public class UserAccount {
     @Override
     public int hashCode(){
         return Objects.hash(id);
+    }
+
+    public void addToken(ActivateToken token){
+        tokens.add(token);
+        token.setAccount(this);
+    }
+    public void removeToken(ActivateToken token){
+        tokens.remove(token);
+        token.setAccount(null);
     }
 }

@@ -24,6 +24,11 @@ repositories {
 }
 
 dependencies {
+	// https://mvnrepository.com/artifact/software.amazon.awssdk/s3
+	implementation("software.amazon.awssdk:s3:2.29.37")
+	// https://mvnrepository.com/artifact/io.awspring.cloud/spring-cloud-aws-starter
+	implementation("io.awspring.cloud:spring-cloud-aws-starter:3.2.1")
+
 	// https://mvnrepository.com/artifact/io.hypersistence/hypersistence-tsid
 	implementation("io.hypersistence:hypersistence-utils-hibernate-62:3.9.0")
 	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api

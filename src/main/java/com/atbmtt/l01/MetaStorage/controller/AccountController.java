@@ -1,5 +1,4 @@
 package com.atbmtt.l01.MetaStorage.controller;
-
 import com.atbmtt.l01.MetaStorage.exception.TokenExpiredException;
 import com.atbmtt.l01.MetaStorage.exception.UserExistException;
 import com.atbmtt.l01.MetaStorage.response.GenericResponse;
@@ -9,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("account")
@@ -37,7 +38,7 @@ public class AccountController {
                             HttpStatus.CREATED.getReasonPhrase()
                     )
             );
-        }catch (UserExistException ex){
+        }catch (NoSuchElementException ex){
             throw new ResponseStatusException(HttpStatus.CONFLICT,ex.getMessage(),ex);
         }
     }
@@ -56,6 +57,24 @@ public class AccountController {
             );
         }catch(TokenExpiredException exception){
             throw new ResponseStatusException(HttpStatus.CONFLICT, exception.getLocalizedMessage(),exception);
+        }
+    }
+    @PostMapping("token")
+    public ResponseEntity<?> getToken(
+            @RequestParam("userName") String userName,
+            @RequestParam("email") String email
+    ){
+        try{
+            accountService.getToken(userName,email);
+            return ResponseEntity.ok().body(
+                    new GenericResponse(
+                            "Create token successfully",
+                            HttpStatus.CREATED.value(),
+                            HttpStatus.CREATED.getReasonPhrase()
+                    )
+            );
+        }catch(NoSuchElementException ex){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,ex.getMessage(),ex);
         }
     }
 }

@@ -26,6 +26,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.keygen.Base64StringKeyGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,10 +75,7 @@ public class AccountService {
             String email,
             String password
     ){
-        UserAccount a = accountRepository.findByEmail(email);
-        if(a != null){
-            throw new UserExistException("This email has already been used");
-        }
+        UserAccount a = accountRepository.findByEmail(email).orElseThrow();
         User user = new User(userName);
         UserAccount account = new UserAccount(email, encoder.encode(password));
         user.setUserAccount(account);
@@ -114,6 +112,13 @@ public class AccountService {
                         + "Thank you,<br>"
                         + "Meta.",customerName,verifyUrl,verifyUrl
         );
+    }
+    @Transactional
+    public void getToken(String userName,String email){
+        UserAccount userAccount = accountRepository.findByEmail(email).orElseThrow();
+        String tokenString = RandomCharacterGenerator.getString((byte)64);
+        ActivateToken token = new ActivateToken(tokenString);
+        sendEmailVerification(userName,email,tokenString);
     }
     @Transactional
     public void verify(String token){
