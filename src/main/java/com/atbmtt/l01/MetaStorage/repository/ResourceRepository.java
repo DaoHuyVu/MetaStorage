@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface ResourceRepository extends JpaRepository<Resource,Long> {
     @Query("""
-            SELECT new com.atbmtt.l01.MetaStorage.dto.ResourceDto(r.name,r.uploadTime,r.lastUpdate,r.capacity,r.uri)
+            SELECT new com.atbmtt.l01.MetaStorage.dto.ResourceDto(r.name,r.uploadTime,r.lastUpdate,r.capacity,r.uri,r.isFavourite,r.isTempDelete)
             from Resource r
             join UserResource ur
             on r.id = ur.resource.id

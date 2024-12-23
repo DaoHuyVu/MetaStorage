@@ -26,7 +26,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.keygen.Base64StringKeyGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,7 +74,10 @@ public class AccountService {
             String email,
             String password
     ){
-        UserAccount a = accountRepository.findByEmail(email).orElseThrow();
+        UserAccount a = accountRepository.findByEmail(email).orElse(null);
+        if(a != null){
+            throw new UserExistException("This email has already been used");
+        }
         User user = new User(userName);
         UserAccount account = new UserAccount(email, encoder.encode(password));
         user.setUserAccount(account);

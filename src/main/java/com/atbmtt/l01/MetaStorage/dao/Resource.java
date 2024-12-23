@@ -31,15 +31,19 @@ public class Resource {
     private Long capacity;
     @OneToMany(mappedBy = "resource",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<UserResource> users = new ArrayList<>();
-
+    @Column(name = "is_favourite")
+    private Boolean isFavourite;
+    @Column(name = "is_temp_delete")
+    private Boolean isTempDelete;
     public Resource(String name, LocalDateTime uploadTime, LocalDateTime lastUpdate, String uri, Long capacity) {
         this.name = name;
         this.uploadTime = uploadTime;
         this.lastUpdate = lastUpdate;
         this.uri = uri;
         this.capacity = capacity;
+        isFavourite = false;
+        isTempDelete = false;
     }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -53,11 +57,18 @@ public class Resource {
         return Objects.hash(id);
     }
 
-    public void addUser(UserAccount account){
+    public void addOwner(UserAccount account){
+        UserResource resource = new UserResource(this,account);
+        resource.setOwner(true);
+        users.add(resource);
+        account.getResources().add(resource);
+    }
+    public void addReceiver(UserAccount account){
         UserResource resource = new UserResource(this,account);
         users.add(resource);
         account.getResources().add(resource);
     }
+
     public void removeUser(UserAccount account){
         for(UserResource user : users){
             if(user.getResource().equals(this) && user.getAccount().equals(account)){

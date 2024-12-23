@@ -1,7 +1,7 @@
 package com.atbmtt.l01.MetaStorage.controller;
 
+import com.atbmtt.l01.MetaStorage.dto.ResourceContent;
 import com.atbmtt.l01.MetaStorage.dto.ResourceDto;
-import com.atbmtt.l01.MetaStorage.response.GenericResponse;
 import com.atbmtt.l01.MetaStorage.service.ResourceService;
 import com.atbmtt.l01.MetaStorage.service.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +26,10 @@ public class ResourceController {
             @RequestParam("fileContent") MultipartFile file
     ) {
        try{
-           String fileUri = resourceService.postResource(file);
-           s3Service.uploadResource(fileUri,file);
+           ResourceDto resourceDto = resourceService.postResource(file);
+           s3Service.uploadResource(resourceDto.getUri(),file);
            return ResponseEntity.ok().body(
-                   new GenericResponse(
-                           "Upload resource successfully",
-                           HttpStatus.OK.value(),
-                           HttpStatus.OK.getReasonPhrase()
-                   )
+                   resourceDto
            );
        }catch(NoSuchElementException exception){
            throw new ResponseStatusException(
@@ -52,9 +48,14 @@ public class ResourceController {
     @GetMapping("")
     public ResponseEntity<?> getOwnerResources(){
         List<ResourceDto> resourceDtoList = resourceService.getOwnerResources();
-        resourceDtoList.forEach(resource ->
-                    resource.setContent(s3Service.getResource(resource.getUri()))
-                );
         return ResponseEntity.ok().body(resourceDtoList);
+    }
+    @GetMapping("{uri}")
+    public ResponseEntity<?> getResourceContent(
+            @PathVariable("uri") String uri
+    ){
+        ResourceContent resourceContent = new ResourceContent(uri);
+        resourceContent.setContent(s3Service.getResource(uri));
+        return ResponseEntity.ok().body(resourceContent);
     }
 }

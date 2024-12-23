@@ -8,6 +8,8 @@ import com.atbmtt.l01.MetaStorage.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -21,8 +23,14 @@ public class AccountController {
     @PostMapping("login")
     public ResponseEntity<?> login(
             @RequestBody LoginRequest request
-            ){
-        return ResponseEntity.ok().body(accountService.login(request.getUserName(),request.getPassword()));
+    ){
+        try{
+            return ResponseEntity.ok().body(accountService.login(request.getUserName(),request.getPassword()));
+        }catch(BadCredentialsException exception){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,exception.getMessage(),exception);
+        }catch(DisabledException exception){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,exception.getMessage(),exception);
+        }
     }
     @PostMapping("signUp")
     public ResponseEntity<?> signUp(
@@ -37,7 +45,7 @@ public class AccountController {
                             HttpStatus.CREATED.getReasonPhrase()
                     )
             );
-        }catch (NoSuchElementException ex){
+        }catch (UserExistException ex){
             throw new ResponseStatusException(HttpStatus.CONFLICT,ex.getMessage(),ex);
         }
     }
