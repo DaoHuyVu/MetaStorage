@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional(readOnly = true)
@@ -42,6 +43,7 @@ public class ResourceService {
         resource.addOwner(account);
         resourceRepository.save(resource);
         return new ResourceDto(
+                resource.getId(),
                 file.getOriginalFilename(),
                 now,now,
                 file.getSize(),
@@ -50,10 +52,28 @@ public class ResourceService {
                 false
         );
     }
+    @Transactional
     public List<ResourceDto> getOwnerResources(){
         UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         String userName = (String) token.getPrincipal();
         return resourceRepository.findByOwnerName(userName).orElse(new ArrayList<>());
     }
-
+    @Transactional
+    public ResourceDto changeResourceInfo(Map<String,String> fields,Long id){
+        Resource resource = resourceRepository.findById(id).orElseThrow();
+        fields.forEach((key,value) -> {
+            if(key.equals("is_favourite")){
+                resource.setIsFavourite(Boolean.parseBoolean(value));
+                resource.setLastUpdate(LocalDateTime.now());
+            }
+            else if(key.equals("is_temp_delete")){
+                resource.setIsTempDelete(Boolean.parseBoolean(value));
+                resource.setLastUpdate(LocalDateTime.now());
+            }
+        });
+        resourceRepository.save(resource);
+        return new ResourceDto(
+                resource
+        );
+    }
 }

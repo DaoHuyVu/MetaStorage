@@ -4,6 +4,7 @@ import com.atbmtt.l01.MetaStorage.dao.ActivateToken;
 import com.atbmtt.l01.MetaStorage.dao.User;
 import com.atbmtt.l01.MetaStorage.dao.UserAccount;
 import com.atbmtt.l01.MetaStorage.dto.ActivateTokenDto;
+import com.atbmtt.l01.MetaStorage.dto.PasswordDto;
 import com.atbmtt.l01.MetaStorage.dto.UserAccountDto;
 import com.atbmtt.l01.MetaStorage.dto.UserDto;
 import com.atbmtt.l01.MetaStorage.exception.TokenExpiredException;
@@ -29,6 +30,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Map;
+
 @Service
 @Transactional(readOnly = true)
 @SuppressWarnings("unused")
@@ -52,6 +56,8 @@ public class AccountService {
     private String adminEmail;
     @Value("${SERVER_HOST}")
     private String serverHost;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     public LoginResponse login(String email, String password){
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                 email,password
@@ -132,5 +138,16 @@ public class AccountService {
         UserAccount account = accountRepository.findById(activateToken.getId()).orElseThrow();
         account.setIsActivated(true);
         accountRepository.save(account);
+    }
+    @Transactional
+    public void updatePassword(PasswordDto fields, String userName){
+        UserAccount userAccount = accountRepository.findByEmail(userName).orElseThrow();
+        if(encoder.matches(fields.getOldPassword(),userAccount.getPassword())){
+            userAccount.setPassword(fields.getNewPassword());
+        }
+        else{
+            throw new RuntimeException("Old password not match");
+        }
+        accountRepository.save(userAccount);
     }
 }
