@@ -27,7 +27,7 @@ public class Resource {
     private LocalDateTime lastUpdate;
     @Column(nullable = false,columnDefinition = "nvarchar(255)")
     private String uri;
-    @Column(nullable = false,precision = 2)
+    @Column(nullable = false)
     private Long capacity;
     @OneToMany(mappedBy = "resource",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<UserResource> users = new ArrayList<>();
@@ -68,7 +68,6 @@ public class Resource {
         users.add(resource);
         account.getResources().add(resource);
     }
-
     public void removeUser(UserAccount account){
         for(UserResource user : users){
             if(user.getResource().equals(this) && user.getAccount().equals(account)){

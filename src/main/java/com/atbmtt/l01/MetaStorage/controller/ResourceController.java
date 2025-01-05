@@ -7,7 +7,10 @@ import com.atbmtt.l01.MetaStorage.service.S3Service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,9 +64,11 @@ public class ResourceController {
     public ResponseEntity<?> getResourceContent(
             @PathVariable("uri") String uri
     ){
-        ResourceContent resourceContent = new ResourceContent(uri);
-        resourceContent.setContent(s3Service.getResource(uri));
-        return ResponseEntity.ok().body(resourceContent);
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"" + uri + "\"")
+                .body(new InputStreamResource(s3Service.getResource(uri)));
     }
     @PatchMapping("")
     public ResponseEntity<?> changeResourceInfo(

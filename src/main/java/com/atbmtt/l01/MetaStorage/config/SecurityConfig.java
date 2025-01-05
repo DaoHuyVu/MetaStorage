@@ -69,7 +69,7 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain accountSecurityChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .securityMatcher("/account/**")
+                .securityMatcher("/account/login","/account/signUp","/account/verify")
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers(
@@ -85,9 +85,6 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain authenticatedRequestSecurityFilterChain(HttpSecurity httpSecurity) throws Exception{
         return httpSecurity
-                .securityMatcher(
-                        "/resource/**"
-                )
                 .authorizeHttpRequests(auth ->
                     auth
                             .anyRequest().authenticated())

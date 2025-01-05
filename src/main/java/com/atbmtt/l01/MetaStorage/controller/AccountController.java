@@ -1,12 +1,10 @@
 package com.atbmtt.l01.MetaStorage.controller;
-import com.atbmtt.l01.MetaStorage.dto.PasswordDto;
 import com.atbmtt.l01.MetaStorage.exception.TokenExpiredException;
 import com.atbmtt.l01.MetaStorage.exception.UserExistException;
 import com.atbmtt.l01.MetaStorage.request.LoginRequest;
 import com.atbmtt.l01.MetaStorage.request.SignUpRequest;
 import com.atbmtt.l01.MetaStorage.response.GenericResponse;
 import com.atbmtt.l01.MetaStorage.service.AccountService;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +20,7 @@ import java.util.NoSuchElementException;
 public class AccountController {
     @Autowired
     private AccountService accountService;
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
     @PostMapping("login")
     public ResponseEntity<?> login(
             @RequestBody LoginRequest request
@@ -87,15 +85,30 @@ public class AccountController {
             throw new ResponseStatusException(HttpStatus.CONFLICT,ex.getMessage(),ex);
         }
     }
-    @PatchMapping("")
+    @PatchMapping("password")
     public ResponseEntity<?> updatePassword(
-            @RequestParam("fields") String f,
+            @RequestParam("oldPassword") String oldPassword,
+            @RequestParam("newPassword") String newPassword,
             @RequestParam("id") String userName
     ){
         try{
-            PasswordDto fields = mapper.readValue(f,new TypeReference<>(){});
-            accountService.updatePassword(fields,userName);
+            accountService.updatePassword(oldPassword,newPassword,userName);
             return ResponseEntity.ok().body("Change password successfully");
+        }catch(Exception ex){
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ex.getMessage(),
+                    ex
+            );
+        }
+    } @PatchMapping("email")
+    public ResponseEntity<?> updateEmail(
+            @RequestParam("newEmail") String newEmail,
+            @RequestParam("email") String email
+    ){
+        try{
+            accountService.updateEmail(newEmail,email);
+            return ResponseEntity.ok().body("Change email successfully");
         }catch(Exception ex){
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,

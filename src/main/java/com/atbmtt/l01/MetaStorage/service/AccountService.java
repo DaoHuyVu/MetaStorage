@@ -4,7 +4,6 @@ import com.atbmtt.l01.MetaStorage.dao.ActivateToken;
 import com.atbmtt.l01.MetaStorage.dao.User;
 import com.atbmtt.l01.MetaStorage.dao.UserAccount;
 import com.atbmtt.l01.MetaStorage.dto.ActivateTokenDto;
-import com.atbmtt.l01.MetaStorage.dto.PasswordDto;
 import com.atbmtt.l01.MetaStorage.dto.UserAccountDto;
 import com.atbmtt.l01.MetaStorage.dto.UserDto;
 import com.atbmtt.l01.MetaStorage.exception.TokenExpiredException;
@@ -30,8 +29,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
 
 @Service
 @Transactional(readOnly = true)
@@ -115,7 +112,7 @@ public class AccountService {
         String verifyUrl = serverHost + "/account/verify?confirm=" + token;
         return String.format(
                 "Dear %s,<br>"
-                        + "Please click the link below to verify your registration:<br>"
+                        + "Please click the link below to verify your account registration:<br>"
                         + "<h3><a rel =\"icon\" href=\"%s\" target=\"_self\">%s</a></h3>"
                         + "Thank you,<br>"
                         + "Meta.",customerName,verifyUrl,verifyUrl
@@ -140,14 +137,27 @@ public class AccountService {
         accountRepository.save(account);
     }
     @Transactional
-    public void updatePassword(PasswordDto fields, String userName){
+    public void updatePassword(String oldPassword,String newPassword, String userName){
         UserAccount userAccount = accountRepository.findByEmail(userName).orElseThrow();
-        if(encoder.matches(fields.getOldPassword(),userAccount.getPassword())){
-            userAccount.setPassword(fields.getNewPassword());
+        if(oldPassword.equals(newPassword)){
+            throw  new RuntimeException("New password must be different from the old one");
+        }
+        if(encoder.matches(oldPassword,userAccount.getPassword())){
+            userAccount.setPassword(encoder.encode(newPassword));
         }
         else{
             throw new RuntimeException("Old password not match");
         }
         accountRepository.save(userAccount);
+    }
+    @Transactional
+    public void updateEmail(String newEmail,String email){
+        UserAccount userAccount = accountRepository.findByEmail(email).orElseThrow();
+        if(newEmail.equals(email)){
+            throw  new RuntimeException("New email must be different from the old one");
+        }
+        else{
+            userAccount.setEmail(newEmail);
+        }
     }
 }
