@@ -13,11 +13,17 @@ import java.util.Optional;
 @Repository
 public interface ResourceRepository extends JpaRepository<Resource,Long> {
     @Query("""
-            SELECT new com.atbmtt.l01.MetaStorage.dto.ResourceDto(r.id,r.name,r.uploadTime,r.lastUpdate,r.capacity,r.uri,r.isFavourite,r.isTempDelete)
+            SELECT new com.atbmtt.l01.MetaStorage.dto.ResourceDto(r.id,r.name,r.uploadTime,r.lastUpdate,r.capacity,r.uri,r.isFavourite,r.isTempDelete,r.password,r.sharedAt)
             from Resource r
             join UserResource ur
             on r.id = ur.resource.id
             where ur.isOwner = true and ur.account.email = :email
             """)
     Optional<List<ResourceDto>> findByOwnerName(@Param("email") String userName);
+    @Query("""
+            SELECT r
+            from Resource r
+            where uri = :uri
+            """)
+    Optional<Resource> findByUri(@Param("uri") String uri);
 }

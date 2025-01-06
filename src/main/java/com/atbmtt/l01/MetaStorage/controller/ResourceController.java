@@ -2,6 +2,8 @@ package com.atbmtt.l01.MetaStorage.controller;
 
 import com.atbmtt.l01.MetaStorage.dto.ResourceContent;
 import com.atbmtt.l01.MetaStorage.dto.ResourceDto;
+import com.atbmtt.l01.MetaStorage.dto.SharedResource;
+import com.atbmtt.l01.MetaStorage.exception.PasswordNotProvideException;
 import com.atbmtt.l01.MetaStorage.service.ResourceService;
 import com.atbmtt.l01.MetaStorage.service.S3Service;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -12,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -64,11 +67,19 @@ public class ResourceController {
     public ResponseEntity<?> getResourceContent(
             @PathVariable("uri") String uri
     ){
-        return ResponseEntity
-                .ok()
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"" + uri + "\"")
-                .body(new InputStreamResource(s3Service.getResource(uri)));
+        try{
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"" + uri + "\"")
+                    .body(new InputStreamResource(s3Service.getResource(uri)));
+        } catch(Exception exception){
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    exception.getMessage(),
+                    exception
+            );
+        }
     }
     @PatchMapping("")
     public ResponseEntity<?> changeResourceInfo(
@@ -78,6 +89,94 @@ public class ResourceController {
         try{
             Map<String,String> fields = objectMapper.readValue(f, new TypeReference<>(){});
             return ResponseEntity.ok().body( resourceService.changeResourceInfo(fields,id));
+        }
+        catch(Exception exception){
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    exception.getMessage(),
+                    exception
+            );
+        }
+    }
+    @PatchMapping("password")
+    public ResponseEntity<?> changeResourcePassword(
+            @RequestParam("password") String password,
+            @RequestParam("id") Long id
+    ){
+        try{
+            return ResponseEntity.ok().body(resourceService.changeResourcePassword(id,password));
+        }catch(Exception ex){
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ex.getMessage(),
+                    ex
+            );
+        }
+    }
+    @GetMapping("share/{uri}")
+    public ResponseEntity<?> getSharedResource(
+            @PathVariable("uri") String uri
+    ) {
+        try {
+            resourceService.inspectPermission(uri);
+            String[] temp = uri.split("#");
+            ResourceDto resourceDto = resourceService.getResourceDtoFromUri(temp[0]);
+            return ResponseEntity
+                    .ok()
+                    .body(
+                            new SharedResource(
+                                    resourceDto.getName(),
+                                    resourceDto.getCapacity(),
+                                    uri
+                            )
+                    );
+        } catch (BadCredentialsException exception) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    exception.getMessage(),
+                    exception
+            );
+        } catch (PasswordNotProvideException exception) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    exception.getMessage(),
+                    exception
+            );
+        } catch (Exception exception) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    exception.getMessage(),
+                    exception
+            );
+        }
+    }
+    @GetMapping("share/{uri}/content")
+    public ResponseEntity<?> getSharedResourceContent(
+            @PathVariable("uri") String uri
+    ){
+        try{
+            resourceService.inspectPermission(uri);
+            String[] temp = uri.split("#");
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"" + uri + "\"")
+                    .body(
+                            new InputStreamResource(s3Service.getResource(temp[0]))
+                    );
+        }catch(BadCredentialsException exception){
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    exception.getMessage(),
+                    exception
+            );
+        }
+        catch (PasswordNotProvideException exception){
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    exception.getMessage(),
+                    exception
+            );
         }
         catch(Exception exception){
             throw new ResponseStatusException(

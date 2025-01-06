@@ -30,22 +30,14 @@ public class UserAccount {
     private LocalDateTime createdAt;
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "account",orphanRemoval = true)
     private List<ActivateToken> tokens = new ArrayList<>();
-
     @OneToMany(mappedBy = "account",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<UserResource> resources = new ArrayList<>();
-//    @JoinTable(name = "account_role",
-//            joinColumns = @JoinColumn(name = "account_id"),
-//            inverseJoinColumns = @JoinColumn(name = "role_id")
-//    )
-//    @ManyToMany(cascade = {
-//            CascadeType.PERSIST,
-//            CascadeType.MERGE
-//    })
-//    private Set<Role> roles = new HashSet<>();
     @Column(name = "role",nullable = false)
     @Enumerated(EnumType.STRING)
     private ERole role;
 
+    @Column(name = "public_key",nullable = false)
+    public String publicKey;
     public UserAccount(String email, String password) {
         this.email = email;
         this.password = password;

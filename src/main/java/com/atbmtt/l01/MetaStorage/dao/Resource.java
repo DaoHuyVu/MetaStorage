@@ -35,6 +35,10 @@ public class Resource {
     private Boolean isFavourite;
     @Column(name = "is_temp_delete")
     private Boolean isTempDelete;
+    @Column(name = "password")
+    private String password;
+    @Column(name = "shared_at")
+    private LocalDateTime sharedAt;
     public Resource(String name, LocalDateTime uploadTime, LocalDateTime lastUpdate, String uri, Long capacity) {
         this.name = name;
         this.uploadTime = uploadTime;

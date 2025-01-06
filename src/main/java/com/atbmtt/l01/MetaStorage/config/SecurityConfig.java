@@ -2,6 +2,7 @@ package com.atbmtt.l01.MetaStorage.config;
 
 import com.atbmtt.l01.MetaStorage.security.AuthTokenFilter;
 import com.atbmtt.l01.MetaStorage.security.JwtUtils;
+import com.atbmtt.l01.MetaStorage.security.KeyPairUtil;
 import com.atbmtt.l01.MetaStorage.security.service.UserDetailsServiceImpl;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -64,6 +65,10 @@ public class SecurityConfig {
         FilterRegistrationBean<T> registrationBean = new FilterRegistrationBean<>(filter);
         registrationBean.setEnabled(false);
         return registrationBean;
+    }
+    @Bean
+    public KeyPairUtil provideKeyPair(){
+        return new KeyPairUtil();
     }
     @Bean
     @Order(1)
