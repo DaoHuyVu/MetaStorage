@@ -1,6 +1,5 @@
 package com.atbmtt.l01.MetaStorage.controller;
 
-import com.atbmtt.l01.MetaStorage.dto.ResourceContent;
 import com.atbmtt.l01.MetaStorage.dto.ResourceDto;
 import com.atbmtt.l01.MetaStorage.dto.SharedResource;
 import com.atbmtt.l01.MetaStorage.exception.PasswordNotProvideException;
@@ -10,6 +9,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,9 +22,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-
-import static com.fasterxml.jackson.databind.type.LogicalType.Map;
-
 @RestController
 @RequestMapping("resource")
 public class ResourceController {
@@ -113,6 +110,20 @@ public class ResourceController {
             );
         }
     }
+    @PatchMapping("link/delete")
+    public ResponseEntity<?> deleteLink(
+            @RequestParam("uri") String uri
+    ){
+        try{
+            return ResponseEntity.ok().body(resourceService.deleteLink(uri));
+        }catch(Exception ex){
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ex.getMessage(),
+                    ex
+            );
+        }
+    }
     @GetMapping("share/{uri}")
     public ResponseEntity<?> getSharedResource(
             @PathVariable("uri") String uri
@@ -186,4 +197,18 @@ public class ResourceController {
             );
         }
     }
+    @GetMapping("share")
+    public ResponseEntity<?> getSharedResources(){
+        try{
+
+            return ResponseEntity.ok(resourceService.getSharedResources());
+        }catch(Exception exception){
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    exception.getMessage(),
+                    exception
+            );
+        }
+    }
+
 }

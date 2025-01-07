@@ -83,4 +83,14 @@ public class Resource {
             }
         }
     }
+    public void removeAllReceivers() {
+        for (UserResource user : users) {
+            if (!user.isOwner()) {
+                user.setResource(null);
+                user.setAccount(null);
+                user.getAccount().getResources().remove(user);
+                users.remove(user);
+            }
+        }
+    }
 }

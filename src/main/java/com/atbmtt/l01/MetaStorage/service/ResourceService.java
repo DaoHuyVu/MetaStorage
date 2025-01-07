@@ -87,6 +87,7 @@ public class ResourceService {
                 resource
         );
     }
+    @Transactional
     public void inspectPermission(String uri){
         UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         String userName = (String) token.getPrincipal();
@@ -113,11 +114,26 @@ public class ResourceService {
             resource.setSharedAt(LocalDateTime.now());
         }
         resource.setPassword(encoder.encode(password));
+        resource.removeAllReceivers();
+        resourceRepository.save(resource);
+        return new ResourceDto(resource);
+    }
+    @Transactional
+    public ResourceDto deleteLink(String uri){
+        Resource resource = resourceRepository.findByUri(uri).orElseThrow();
+        resource.setPassword(null);
+        resource.setSharedAt(null);
+        resource.removeAllReceivers();
         resourceRepository.save(resource);
         return new ResourceDto(resource);
     }
     public ResourceDto getResourceDtoFromUri(String uri){
         Resource resource = resourceRepository.findByUri(uri).orElseThrow();
         return new ResourceDto(resource);
+    }
+    public List<ResourceDto> getSharedResources(){
+        UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        String userName = (String) token.getPrincipal();
+       return resourceRepository.findSharedResources(userName).orElse(new ArrayList<>());
     }
 }

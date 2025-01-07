@@ -26,4 +26,15 @@ public interface ResourceRepository extends JpaRepository<Resource,Long> {
             where uri = :uri
             """)
     Optional<Resource> findByUri(@Param("uri") String uri);
+
+    @Query("""
+            SELECT new com.atbmtt.l01.MetaStorage.dto.ResourceDto(r.id,r.name,r.uploadTime,r.lastUpdate,r.capacity,r.uri,r.isFavourite,r.isTempDelete,r.password,r.sharedAt)
+            from Resource r
+            join UserResource ur
+            on r.id = ur.resource.id
+            join UserAccount uc
+            on ur.account.id = uc.id
+            where uc.email = :email and ur.isOwner = false
+            """)
+    Optional<List<ResourceDto>> findSharedResources(@Param("email") String email);
 }
