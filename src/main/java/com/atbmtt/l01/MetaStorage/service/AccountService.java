@@ -71,6 +71,13 @@ public class AccountService {
                 )
         );
     }
+    public LoginResponse loginBiometric(String email,String name){
+        String accessToken = jwtUtils.createJwt(email);
+        return new LoginResponse(
+                accessToken,
+                new UserAccountDto(name,email)
+        );
+    }
     @Transactional
     public void signUp(
             String userName,
@@ -90,7 +97,6 @@ public class AccountService {
         accountRepository.save(account);
         userRepository.save(user);
         activateTokenRepository.save(token);
-
         sendEmailVerification(userName,email, tokenString);
     }
     private void sendEmailVerification(String customerName,String email,String token){

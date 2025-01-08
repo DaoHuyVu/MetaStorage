@@ -89,7 +89,7 @@ public class AccountController {
     public ResponseEntity<?> updatePassword(
             @RequestParam("oldPassword") String oldPassword,
             @RequestParam("newPassword") String newPassword,
-            @RequestParam("id") String userName
+            @RequestParam("email") String userName
     ){
         try{
             accountService.updatePassword(oldPassword,newPassword,userName);
@@ -115,6 +115,19 @@ public class AccountController {
                     ex.getMessage(),
                     ex
             );
+        }
+    }
+    @PostMapping("login/biometrics")
+    public ResponseEntity<?> loginBiometrics(
+            @RequestParam("email") String email,
+            @RequestParam("name") String name
+    ){
+        try{
+            return ResponseEntity.ok().body(accountService.loginBiometric(email,name));
+        }catch(BadCredentialsException exception){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,exception.getMessage(),exception);
+        }catch(DisabledException exception){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,exception.getMessage(),exception);
         }
     }
 }

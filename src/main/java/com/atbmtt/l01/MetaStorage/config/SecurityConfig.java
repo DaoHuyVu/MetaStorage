@@ -74,11 +74,11 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain accountSecurityChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .securityMatcher("/account/login","/account/signUp","/account/verify")
+                .securityMatcher("/account/login","/account/signUp","/account/verify","/account/login/biometrics")
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers(
-                                    "/account/login", "/account/signUp","/account/verify"
+                                    "/account/login", "/account/signUp","/account/verify","/account/login/biometrics"
                                 ).permitAll()
                                 .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)

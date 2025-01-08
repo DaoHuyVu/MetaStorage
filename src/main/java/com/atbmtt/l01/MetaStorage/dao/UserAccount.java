@@ -35,9 +35,9 @@ public class UserAccount {
     @Column(name = "role",nullable = false)
     @Enumerated(EnumType.STRING)
     private ERole role;
+//    @Column(name = "public_key",nullable = true)
+//    public String publicKey;
 
-    @Column(name = "public_key",nullable = false)
-    public String publicKey;
     public UserAccount(String email, String password) {
         this.email = email;
         this.password = password;

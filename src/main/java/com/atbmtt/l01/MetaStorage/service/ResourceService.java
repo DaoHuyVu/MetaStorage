@@ -38,7 +38,7 @@ public class ResourceService {
     public ResourceDto postResource(
         MultipartFile file
     ){
-        String fileUri = RandomCharacterGenerator.getString((byte)64);
+        String fileUri = RandomCharacterGenerator.getString((byte)64) + "-" + file.getOriginalFilename();
         LocalDateTime now = LocalDateTime.now();
         Resource resource = new Resource(
                 file.getOriginalFilename(),
